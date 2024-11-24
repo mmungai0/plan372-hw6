@@ -1,0 +1,54 @@
+---
+title: "hw6-r"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Get libraries 
+
+```{r}
+library(tidyverse)
+library(igraph)
+library(ggplot2)
+```
+
+#Question 1: How many records are there in each state (include a table or bar plot)?
+
+The dataset does not contain a state column, but does contain a city column which contains both city and state information (e.g. Charlotte, NC). Use a regular expression to create separate columns for the city name and state abbreviation, and use these columns to answer the following questions.
+
+Read in data
+```{r}
+tree = read.csv("TS3_Raw_tree_data.csv")
+```
+
+Creating separate columns for city name and state abbreviation
+```{r}
+# For memory: 
+  
+unique(tree$City)
+all(str_detect(tree$City, "^[:alpha:]+[:punct:] [:upper:]+$"))
+#[:punct:] doesn't seem to match when i use str_detect but it returns more or less the right answer when I use str_match
+
+
+str_match(tree$City, "^([:alpha:]+[:punct:]) ([:upper:]+)$")
+
+tree[,c("city", "state")] = str_match(tree$City, "^([:alpha:]+[:punct:]) ([:upper:]+)$")[,2:3]
+
+table(tree$state)
+```
+
+Creating a bar plot for the records in each state
+```{r}
+tree |>
+  ggplot(aes(x=state)) + geom_bar() 
+
+```
+
+```{r}
+
+```
+
