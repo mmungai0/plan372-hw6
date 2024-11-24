@@ -47,8 +47,22 @@ tree |>
   ggplot(aes(x=state)) + geom_bar() 
 
 ```
+#Question 2: What cities did they collect data from in North and South Carolina?
 
+Since different trees grow differently in different parts of the country, the city wants you to only use data from North and South Carolina. Filter the dataset to only these states, and use that filtered dataset for all remaining questions.
+
+Filtering dataset to only include North and South Carolina
 ```{r}
+carolinas = tree |>
+  filter(state=="NC" | state=="SC")
 
+unique(carolinas$state) #just to double check that the filtering worked
+table(carolinas$city) # to find the cities in these states that they collected data from
 ```
+They just collected data from Charleston and Charlotte.
 
+#Question 3: What genus of trees has the largest crown diameter in North and South Carolina?
+
+The crown size is in the column AvgCdia (m), in meters.
+
+The data contain the scientific names of the species of each surveyed tree. Scientific names use binomial nomenclatureLinks to an external site., where the scientific names contain both a genus (plural genera) and species. For instance, Acer saccharumLinks to an external site. is the sugar maple; the genus is Acer and the species is saccharum. Trees within a genus are related and may share physical characteristics. For instance, Acer rubrumLinks to an external site. or the red maple is another large maple tree. To maximize sample size, the city has requested you compute the average canopy diameter for each genus. This requires you to write a regular expression to extract the genus.
