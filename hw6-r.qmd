@@ -89,3 +89,31 @@ carolinas |>
 
 ```
 Quercus has the largest crown diameter of trees in North and South Carolina at 13.62 meters.
+
+#Extra Credit 1: Tree Age
+
+Older trees, of course, have larger crowns. Are there differences in the average age of the different genera of trees in the dataset? Might this explain the results of the previous question?
+
+```{r}
+carolinas |>
+  group_by(genus) |>
+  summarise(age = mean(Age)) |>
+  ungroup() |>
+  arrange(age)
+```
+
+This might explain the results of the previous question because the genus with the largest average crown diameter was also the same genus with the highest mean age. There is a large difference between the ages of the genus, with the average age of Quercus being more than double the age age of Pyrus.
+
+Recommend a genera that produces a large crown quickly (among trees in North and South Carolina). You can use any analytical methods you want (group by, plots, linear regression, etc.). Document the process by which you chose this type of tree.
+
+```{r}
+#Scatter plot to see how tree crown sizes fare when age is taken into account 
+
+ggplot(carolinas, aes(x=Age, y=AvgCdia..m., color=genus)) + geom_point() 
+
+#I guess I'd recommend Quercus because even younger Quercus trees seem to have larger crown diameters than their peers. Another good option would be Prunus.   
+```
+
+```{r}
+
+```
