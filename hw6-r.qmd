@@ -65,4 +65,27 @@ They just collected data from Charleston and Charlotte.
 
 The crown size is in the column AvgCdia (m), in meters.
 
-The data contain the scientific names of the species of each surveyed tree. Scientific names use binomial nomenclatureLinks to an external site., where the scientific names contain both a genus (plural genera) and species. For instance, Acer saccharumLinks to an external site. is the sugar maple; the genus is Acer and the species is saccharum. Trees within a genus are related and may share physical characteristics. For instance, Acer rubrumLinks to an external site. or the red maple is another large maple tree. To maximize sample size, the city has requested you compute the average canopy diameter for each genus. This requires you to write a regular expression to extract the genus.
+The data contain the scientific names of the species of each surveyed tree. Scientific names use binomial nomenclature, where the scientific names contain both a genus (plural genera) and species. For instance, Acer saccharum is the sugar maple; the genus is Acer and the species is saccharum. Trees within a genus are related and may share physical characteristics. For instance, Acer rubrum or the red maple is another large maple tree. To maximize sample size, the city has requested you compute the average canopy diameter for each genus. This requires you to write a regular expression to extract the genus.
+
+Extracting the genus from the scientific name
+```{r}
+all(str_detect(carolinas$ScientificName, "^[:alpha:]+ [:alpha:]+$")) 
+    #this is false because there are NA values present in the ScientificName column
+
+str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")
+    #two unlimited alphabetical strings thats why its alpha and alpha 
+
+carolinas[,c("genus", "species")] = str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")[,2:3]
+    #creating 2 new columns for the genus and species
+
+```
+
+Grouping by genus to find the largest crown size
+```{r}
+carolinas |>
+  group_by(genus) |>
+  summarize(crown_size = mean(AvgCdia..m.)) |>
+  ungroup() 
+
+```
+Quercus has the largest crown diameter of trees in North and South Carolina at 13.62 meters.
