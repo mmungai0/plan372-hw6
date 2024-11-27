@@ -75,7 +75,7 @@ all(str_detect(carolinas$ScientificName, "^[:alpha:]+ [:alpha:]+$"))
 str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")
     #two unlimited alphabetical strings thats why its alpha and alpha 
 
-carolinas[,c("genus", "species")] = str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")[,2:3]
+carolinas[,c("genus", "maybespecies")] = str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")[,2:3]
     #creating 2 new columns for the genus and species
 
 ```
@@ -106,14 +106,34 @@ This might explain the results of the previous question because the genus with t
 
 Recommend a genera that produces a large crown quickly (among trees in North and South Carolina). You can use any analytical methods you want (group by, plots, linear regression, etc.). Document the process by which you chose this type of tree.
 
+I'm going to run a regression using age as a control variable because I know certain trees (Quercus) live longer lifespans, which also correspond to their large average crown sizes.
 ```{r}
-#Scatter plot to see how tree crown sizes fare when age is taken into account 
+#have to convert categorical variables to factor variables in order to include them in a linear regression according to Statology (link at bottom of assignment)
+carolinas$genus_factor = as.factor(carolinas$genus)
+lmCarolinaTrees = lm(AvgCdia..m. ~ Age + genus_factor, data = carolinas)
+summary(lmCarolinaTrees)
 
-ggplot(carolinas, aes(x=Age, y=AvgCdia..m., color=genus)) + geom_point() 
-
-#I guess I'd recommend Quercus because even younger Quercus trees seem to have larger crown diameters than their peers. Another good option would be Prunus.   
+#Betula and Ulmus are for some reason the only trees with positive coefficients for avg crown diameter 
 ```
 
+From those results I'll create a scatter plot of the trees from the genuses Betula and Ulmus and see if these results make logical sense (because why were most coefficients negative?) I'll also include Quercus as a comparison genus to help verify these results.
 ```{r}
-
+carolinas|>
+  filter(genus=="Betula" | genus=="Ulmus" | genus == "Quercus") |>
+  ggplot(aes(x=Age, y=AvgCdia..m., color=genus)) + geom_point() 
 ```
+
+I'd still recommend Quercus regardless of the regression results because even younger Quercus trees seem to have larger crown diameters than their peers. Another good option based on both the regression and the scatter plot would be Betula.  
+
+#Extra Credit 2: Species
+So far, all of the analysis has focused on genera. Refine your regular expression to also extract the species as well, as a separate column. Within each genus of tree in North and South Carolina, how many species are recorded in the dataset? [2 points]
+
+#using the unfiltered dataset per email instructions 
+```{r}
+unique(tree$ScientificName) 
+
+str_match(tree$ScientificName, "^([:alpha:]+)[^?[:alpha:]+.]{2,3}.* ([:alpha:]+)?[:alpha:]+.?[:alpha:]+ $")
+```
+
+Statology link: https://www.statology.org/r-linear-regression-with-categorical-variables/ 
+Github link: https://github.com/mmungai0/plan372-hw6 
