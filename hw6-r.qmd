@@ -8,7 +8,7 @@ editor: visual
 
 Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
-## Get libraries 
+## Get libraries
 
 ```{r}
 library(tidyverse)
@@ -21,11 +21,13 @@ library(ggplot2)
 The dataset does not contain a state column, but does contain a city column which contains both city and state information (e.g. Charlotte, NC). Use a regular expression to create separate columns for the city name and state abbreviation, and use these columns to answer the following questions.
 
 Read in data
+
 ```{r}
 tree = read.csv("TS3_Raw_tree_data.csv")
 ```
 
 Creating separate columns for city name and state abbreviation
+
 ```{r}
 # For memory: 
   
@@ -34,24 +36,27 @@ all(str_detect(tree$City, "^[:alpha:]+[:punct:] [:upper:]+$"))
 #[:punct:] doesn't seem to match when i use str_detect but it returns more or less the right answer when I use str_match
 
 
-str_match(tree$City, "^([:alpha:]+[:punct:]) ([:upper:]+)$")
+new_city = str_match(tree$City, "^([:alpha:]+)[:punct:] ([:upper:]+)$")
 
-tree[,c("city", "state")] = str_match(tree$City, "^([:alpha:]+[:punct:]) ([:upper:]+)$")[,2:3]
+tree[,c("city", "state")] = new_city[,2:3]
 
 table(tree$state)
 ```
 
 Creating a bar plot for the records in each state
+
 ```{r}
 tree |>
   ggplot(aes(x=state)) + geom_bar() 
 
 ```
+
 #Question 2: What cities did they collect data from in North and South Carolina?
 
 Since different trees grow differently in different parts of the country, the city wants you to only use data from North and South Carolina. Filter the dataset to only these states, and use that filtered dataset for all remaining questions.
 
 Filtering dataset to only include North and South Carolina
+
 ```{r}
 carolinas = tree |>
   filter(state=="NC" | state=="SC")
@@ -59,6 +64,7 @@ carolinas = tree |>
 unique(carolinas$state) #just to double check that the filtering worked
 table(carolinas$city) # to find the cities in these states that they collected data from
 ```
+
 They just collected data from Charleston and Charlotte.
 
 #Question 3: What genus of trees has the largest crown diameter in North and South Carolina?
@@ -68,19 +74,21 @@ The crown size is in the column AvgCdia (m), in meters.
 The data contain the scientific names of the species of each surveyed tree. Scientific names use binomial nomenclature, where the scientific names contain both a genus (plural genera) and species. For instance, Acer saccharum is the sugar maple; the genus is Acer and the species is saccharum. Trees within a genus are related and may share physical characteristics. For instance, Acer rubrum or the red maple is another large maple tree. To maximize sample size, the city has requested you compute the average canopy diameter for each genus. This requires you to write a regular expression to extract the genus.
 
 Extracting the genus from the scientific name
+
 ```{r}
 all(str_detect(carolinas$ScientificName, "^[:alpha:]+ [:alpha:]+$")) 
     #this is false because there are NA values present in the ScientificName column
 
-str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")
+name = str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")
     #two unlimited alphabetical strings thats why its alpha and alpha 
 
-carolinas[,c("genus", "maybespecies")] = str_match(carolinas$ScientificName, "^([:alpha:]+) ([:alpha:]+)$")[,2:3]
+carolinas[,c("genus", "maybespecies")] = name[,2:3]
     #creating 2 new columns for the genus and species
 
 ```
 
 Grouping by genus to find the largest crown size
+
 ```{r}
 carolinas |>
   group_by(genus) |>
@@ -88,6 +96,7 @@ carolinas |>
   ungroup() 
 
 ```
+
 Quercus has the largest crown diameter of trees in North and South Carolina at 13.62 meters.
 
 #Extra Credit 1: Tree Age
@@ -107,6 +116,7 @@ This might explain the results of the previous question because the genus with t
 Recommend a genera that produces a large crown quickly (among trees in North and South Carolina). You can use any analytical methods you want (group by, plots, linear regression, etc.). Document the process by which you chose this type of tree.
 
 I'm going to run a regression using age as a control variable because I know certain trees (Quercus) live longer lifespans, which also correspond to their large average crown sizes.
+
 ```{r}
 #have to convert categorical variables to factor variables in order to include them in a linear regression according to Statology (link at bottom of assignment)
 carolinas$genus_factor = as.factor(carolinas$genus)
@@ -117,23 +127,25 @@ summary(lmCarolinaTrees)
 ```
 
 From those results I'll create a scatter plot of the trees from the genuses Betula and Ulmus and see if these results make logical sense (because why were most coefficients negative?) I'll also include Quercus as a comparison genus to help verify these results.
+
 ```{r}
 carolinas|>
   filter(genus=="Betula" | genus=="Ulmus" | genus == "Quercus") |>
   ggplot(aes(x=Age, y=AvgCdia..m., color=genus)) + geom_point() 
 ```
 
-I'd still recommend Quercus regardless of the regression results because even younger Quercus trees seem to have larger crown diameters than their peers. Another good option based on both the regression and the scatter plot would be Betula.  
+I'd still recommend Quercus regardless of the regression results because even younger Quercus trees seem to have larger crown diameters than their peers. Another good option based on both the regression and the scatter plot would be Betula.
 
-#Extra Credit 2: Species
-So far, all of the analysis has focused on genera. Refine your regular expression to also extract the species as well, as a separate column. Within each genus of tree in North and South Carolina, how many species are recorded in the dataset? [2 points]
+#Extra Credit 2: Species So far, all of the analysis has focused on genera. Refine your regular expression to also extract the species as well, as a separate column. Within each genus of tree in North and South Carolina, how many species are recorded in the dataset? \[2 points\]
 
-#using the unfiltered dataset per email instructions 
+#using the unfiltered dataset per email instructions
+
 ```{r}
-unique(tree$ScientificName) 
+#unique(tree$ScientificName) 
 
-str_match(tree$ScientificName, "^([:alpha:]+)[^?[:alpha:]+.]{2,3}.* ([:alpha:]+)?[:alpha:]+.?[:alpha:]+ $")
+#str_match(tree$ScientificName, "^([:alpha:]+)[^?[:alpha:]+.]{2,3}.* ([:alpha:]+)?[:alpha:]+.?[:alpha:]+ $")
+
+#I'm not sure how to do this but the code I tried is above. Hopefully this will keep it from being so long.
 ```
 
-Statology link: https://www.statology.org/r-linear-regression-with-categorical-variables/ 
-Github link: https://github.com/mmungai0/plan372-hw6 
+Statology link: https://www.statology.org/r-linear-regression-with-categorical-variables/ Github link: https://github.com/mmungai0/plan372-hw6
